@@ -17,11 +17,15 @@ import java.util.Set;
 
 @Controller
 public class UserController {
-    @Autowired
+
     private UserServiceImpl userService;
-    @Autowired
     private RoleService roleService;
 
+    @Autowired
+    public UserController(UserServiceImpl userService, RoleService roleService) {
+        this.userService = userService;
+        this.roleService = roleService;
+    }
 
     @GetMapping(value = "/user")
     public String userInfo(@AuthenticationPrincipal User user, Model model){
@@ -31,8 +35,10 @@ public class UserController {
     }
 
     @GetMapping(value = "/admin")
-    public String listUsers(Model model) {
+    public String listUsers(@AuthenticationPrincipal User user, Model model) {
         model.addAttribute("allUsers", userService.getAllUsers());
+        model.addAttribute("roles", roleService.getAllRoles());
+        model.addAttribute("user", user);
         return "all-user";
     }
 
@@ -72,7 +78,7 @@ public class UserController {
         return "redirect:/admin";
     }
 
-    @DeleteMapping(value = "/remove/{id}")
+    @PostMapping(value = "/remove/{id}")
     public String removeUser(@PathVariable("id") long id) {
         userService.removeUserById(id);
         return "redirect:/admin";

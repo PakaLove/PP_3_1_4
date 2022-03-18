@@ -106,4 +106,11 @@ public class User implements UserDetails {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "roles=" + roles +
+                '}';
+    }
 }
