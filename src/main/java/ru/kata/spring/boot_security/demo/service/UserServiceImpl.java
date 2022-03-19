@@ -14,28 +14,23 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
-public class UserServiceImpl implements UserService, UserDetailsService {
-
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
+public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    public void setbCryptPasswordEncoder(BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
 
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+    @Override
     public void addUser(User user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
-
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public User getUserById(long id) {
-        return userRepository.findById(id).get();
-    }
-
+    @Override
     public void updateUser(User user) {
         if (user.getPassword().equals(getUserById(user.getId()).getPassword())) {
             user.setPassword(getUserById(user.getId()).getPassword());
@@ -44,19 +39,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         userRepository.save(user);
     }
-
-    public void removeUserById(Long id) {
+    @Override
+    public void removeUserById(long id) {
         userRepository.deleteById(id);
     }
-
-    public User getUserByUsername(String username){return userRepository.findByusername(username); }
-
     @Override
-    public UserDetails loadUserByUsername (String s) throws UsernameNotFoundException{
-        User user = getUserByUsername(s);
-        if(user == null){
-            throw new UsernameNotFoundException("User not found" + s);
-        }
-        return user;
+    public User getUserById(long id) { return userRepository.findById(id).get(); }
+    @Override
+    public List<User> getAllUsers() { return userRepository.findAll(); }
+    @Override
+    public User getUserByName(String username) {
+        return userRepository.findByusername(username);
     }
 }

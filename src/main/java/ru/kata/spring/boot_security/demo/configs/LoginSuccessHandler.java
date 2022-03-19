@@ -39,6 +39,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (response.isCommitted()) {
             return;
         }
+
         redirectStrategy.sendRedirect(request, response, targetUrl);
     }
 
@@ -56,9 +57,9 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
 
         if (isAdmin) {
-            return "/admin";
+            return "/admin/users";
         } else if (isUser) {
-            return "/user";
+            return "/default";
         } else {
             throw new IllegalStateException();
         }
@@ -75,6 +76,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void setRedirectStrategy(RedirectStrategy redirectStrategy) {
         this.redirectStrategy = redirectStrategy;
     }
+
     protected RedirectStrategy getRedirectStrategy() {
         return redirectStrategy;
     }

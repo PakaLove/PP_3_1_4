@@ -3,12 +3,11 @@ package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.model.Role;
-import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.RoleServiceImpl;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
 import java.util.HashSet;
@@ -17,75 +16,35 @@ import java.util.Set;
 
 @Controller
 public class UserController {
-
     private UserServiceImpl userService;
-    private RoleService roleService;
-
+    private RoleServiceImpl roleService;
     @Autowired
-    public UserController(UserServiceImpl userService, RoleService roleService) {
+    public UserController(UserServiceImpl userService, RoleServiceImpl roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
-
-    @GetMapping(value = "/user")
-    public String userInfo(@AuthenticationPrincipal User user, Model model){
-        model.addAttribute("user", user);
-        model.addAttribute("roles", user.getRoles());
-        return "userpage";
-    }
-
-    @GetMapping(value = "/admin")
-    public String listUsers(@AuthenticationPrincipal User user, Model model) {
-        model.addAttribute("allUsers", userService.getAllUsers());
-        model.addAttribute("roles", roleService.getAllRoles());
-        model.addAttribute("user", user);
+    @GetMapping("/admin/users")
+    public String showAll(Model model) {
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        model.addAttribute("user", userService.getUserByName(name));
+        model.addAttribute("users", userService.getAllUsers());
         return "all-user";
     }
 
-    @GetMapping(value = "/admin/new")
-    public String newUser(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("roles", roleService.getAllRoles());
-        return "info";
+    @GetMapping("/user")
+    public String showUserById(Model model) {
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        model.addAttribute("user", userService.getUserByName(name));
+        return "userPage";
+    }
+    @GetMapping("/default")
+    public String redirectToUserID() {
+        return "redirect:/user";
     }
 
-    @PostMapping(value = "/admin/add-user")
-    public String addUser(@ModelAttribute User user, @RequestParam(value = "checkBoxRoles") String[] checkBoxRoles) {
-        Set<Role> roleSet = new HashSet<>();
-        for (String role : checkBoxRoles) {
-            roleSet.add(roleService.getRoleByName(role));
-        }
-        user.setRoles(roleSet);
-        userService.addUser(user);
-        return "redirect:/admin";
-    }
 
-    @GetMapping(value = "/{id}/edit")
-    public String editUserForm(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("roles", roleService.getAllRoles());
-        return "edit";
-    }
-
-    @PatchMapping(value = "/{id}")
-    public String editUser(@ModelAttribute User user, @RequestParam(value = "checkBoxRoles") String[] checkBoxRoles) {
-        Set<Role> roleSet = new HashSet<>();
-        for (String roles : checkBoxRoles) {
-            roleSet.add(roleService.getRoleByName(roles));
-        }
-        user.setRoles(roleSet);
-        userService.updateUser(user);
-        return "redirect:/admin";
-    }
-
-    @PostMapping(value = "/remove/{id}")
-    public String removeUser(@PathVariable("id") long id) {
-        userService.removeUserById(id);
-        return "redirect:/admin";
-    }
-
-    @GetMapping(value ="/login")
-    public String login(){
-        return "login";
+    @GetMapping("/login")
+    public String loginPage(){
+        return "loginPage";
     }
 }

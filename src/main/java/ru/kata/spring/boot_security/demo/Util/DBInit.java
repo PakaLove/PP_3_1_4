@@ -26,8 +26,8 @@ public class DBInit {
     private void postConstruct() {
         Role role1 = new Role("ROLE_ADMIN");
         Role role2 = new Role("ROLE_USER");
-        roleService.createRole(role1);
-        roleService.createRole(role2);
+        roleService.addRole(role1);
+        roleService.addRole(role2);
         Set<Role> roles_admin = new HashSet<>();
         roles_admin.add(roleService.getRoleByName("ROLE_ADMIN"));
         User admin = new User("Alexey","PakaLove", "alex_pakalov@mail.ru", "Paka1337", roles_admin);
